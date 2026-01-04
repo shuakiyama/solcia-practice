@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEET STEP | The Future of Laziness</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <!-- Tailwind Config for Custom Colors/Fonts -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['Orbitron', 'sans-serif'], // Futuristic Header Font
+                    },
+                    colors: {
+                        neon: {
+                            cyan: '#00f3ff',
+                            purple: '#bc13fe',
+                            green: '#0aff68'
+                        },
+                        glass: {
+                            light: 'rgba(255, 255, 255, 0.05)',
+                            border: 'rgba(255, 255, 255, 0.1)',
+                            highlight: 'rgba(255, 255, 255, 0.2)'
+                        }
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Grainy Gradient Background */
+        body {
+            background-color: #050505;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        .grain-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            opacity: 0.05;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+
+        .ambient-glow {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            background: 
+                radial-gradient(circle at 15% 50%, rgba(188, 19, 254, 0.15), transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(0, 243, 255, 0.15), transparent 25%);
+        }
+
+        /* Scroll Animation Utility */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0a0a0a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        /* Text Gradient */
+        .text-gradient {
+            background: linear-gradient(to right, #fff, #a5a5a5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .text-gradient-neon {
+            background: linear-gradient(to right, #00f3ff, #bc13fe);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-neon-cyan selection:text-black">
+
+    <!-- Background Effects -->
+    <div class="grain-overlay"></div>
+    <div class="ambient-glow"></div>
+
+    <!-- Navigation -->
+    <header class="fixed w-full z-50 top-0 transition-all duration-300 p-4">
+        <nav class="max-w-7xl mx-auto bg-glass-light backdrop-blur-md border border-glass-border rounded-full px-6 py-3 flex justify-between items-center shadow-lg hover:border-glass-highlight transition-colors duration-300">
+            <div class="font-mono font-bold text-xl tracking-wider text-white flex items-center gap-2">
+                <div class="w-3 h-3 bg-neon-cyan rounded-full animate-pulse"></div>
+                NEET STEP
+            </div>
+            <div class="hidden md:flex gap-8 text-sm font-medium text-gray-300">
+                <a href="#" class="hover:text-neon-cyan transition-colors">BEDDING</a>
+                <a href="#" class="hover:text-neon-cyan transition-colors">EXCUSES</a>
+                <a href="#" class="hover:text-neon-cyan transition-colors">GAME</a>
+            </div>
+            <button class="bg-white text-black px-5 py-2 rounded-full font-bold text-xs tracking-wide hover:bg-neon-cyan hover:scale-105 transition-all duration-300">
+                I'M SLEEPY
+            </button>
+        </nav>
+    </header>
+
+    <!-- Main Visual (Three.js Container) -->
+    <section class="relative h-screen w-full flex items-center justify-center overflow-hidden">
+        <!-- Canvas for Three.js -->
+        <div id="canvas-container" class="absolute inset-0 z-0"></div>
+
+        <!-- Hero Content -->
+        <div class="relative z-10 text-center px-4 max-w-5xl mx-auto mt-16 pointer-events-none">
+            <p class="reveal font-mono text-neon-cyan tracking-[0.3em] mb-4 text-sm md:text-base">NEXT GEN FUTON-WEAR</p>
+            <h1 class="reveal delay-100 font-mono text-5xl md:text-8xl font-black mb-6 leading-tight">
+                DEFY <span class="text-transparent bg-clip-text bg-gradient-to-r from-neon-cyan to-neon-purple">HATARAKU</span>
+            </h1>
+            <p class="reveal delay-200 text-gray-400 text-lg md:text-xl max-w-2xl mx-auto mb-10 font-light">
+                Advanced laziness meets cyberpunk aesthetics. <br class="hidden md:block">Experience the absolute joy of doing nothing.
+            </p>
+            <div class="reveal delay-300 pointer-events-auto">
+                <button class="group relative px-8 py-4 bg-transparent border border-white/30 text-white font-mono font-bold tracking-wider overflow-hidden rounded-none transition-all hover:border-neon-cyan">
+                    <span class="absolute inset-0 w-0 bg-neon-cyan transition-all duration-[250ms] ease-out group-hover:w-full opacity-20"></span>
+                    <span class="relative flex items-center gap-2">
+                        GO TO BED
+                        <svg class="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+                    </span>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Scroll Indicator -->
+        <div class="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-50 animate-bounce">
+            <span class="text-[10px] tracking-widest font-mono">GIVE UP</span>
+            <div class="w-[1px] h-12 bg-gradient-to-b from-white to-transparent"></div>
+        </div>
+    </section>
+
+    <!-- Bento Grid Section -->
+    <section class="py-24 px-4 relative z-10">
+        <div class="max-w-7xl mx-auto">
+            <div class="mb-16 text-center reveal">
+                <h2 class="font-mono text-3xl md:text-4xl font-bold mb-4">ENGINEERED INACTION</h2>
+                <p class="text-gray-400">Fusion of apathy and potato chips.</p>
+            </div>
+
+            <!-- Grid Layout -->
+            <div class="grid grid-cols-1 md:grid-cols-3 md:grid-rows-2 gap-6 h-auto md:h-[800px]">
+                
+                <!-- Card 1: Main Product (Large) -->
+                <div class="reveal group md:col-span-2 md:row-span-2 relative overflow-hidden rounded-3xl bg-glass-light backdrop-blur-xl border border-glass-border hover:border-neon-cyan/50 transition-all duration-500">
+                    <img src="https://images.unsplash.com/photo-1552346154-21d32810aba3?auto=format&fit=crop&q=80&w=1600" alt="Hero Sneaker" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-80 group-hover:opacity-100">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent"></div>
+                    <div class="absolute bottom-0 left-0 p-8 md:p-12">
+                        <span class="inline-block px-3 py-1 mb-4 text-xs font-mono border border-neon-cyan text-neon-cyan rounded-full bg-neon-cyan/10">自宅警備用</span>
+                        <h3 class="font-mono text-3xl md:text-5xl font-bold mb-2">NEET-X1 PRO</h3>
+                        <p class="text-gray-300 max-w-md text-sm md:text-base mb-6">Designed for the urban hermit. Zero movement technology ensures you never have to leave your gaming chair.</p>
+                        <a href="#" class="text-white border-b border-white pb-1 hover:text-neon-cyan hover:border-neon-cyan transition-colors text-sm tracking-widest">VIEW STATS</a>
+                    </div>
+                </div>
+
+                <!-- Card 2: Technology Detail (Top Right) -->
+                <div class="reveal delay-100 group relative overflow-hidden rounded-3xl bg-glass-light backdrop-blur-xl border border-glass-border hover:border-neon-purple/50 transition-all duration-500">
+                    <div class="absolute inset-0 bg-gradient-to-br from-neon-purple/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                    <div class="p-8 h-full flex flex-col justify-between relative z-10">
+                        <div class="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center mb-4">
+                            <svg class="w-6 h-6 text-neon-purple" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+                        </div>
+                        <div>
+                            <h4 class="font-mono text-xl font-bold mb-2 text-white">Chip-Proof Mesh</h4>
+                            <p class="text-gray-400 text-sm">Repels potato chip dust and energy drink spills instantly.</p>
+                        </div>
+                    </div>
+                    <!-- Decorative Graphic -->
+                    <div class="absolute -right-4 -top-4 w-32 h-32 bg-neon-purple blur-[60px] opacity-40"></div>
+                </div>
+
+                <!-- Card 3: Lifestyle Shot (Bottom Right) -->
+                <div class="reveal delay-200 group relative overflow-hidden rounded-3xl bg-glass-light backdrop-blur-xl border border-glass-border hover:border-neon-green/50 transition-all duration-500">
+                    <img src="https://images.unsplash.com/photo-1515630278258-407f66498911?auto=format&fit=crop&q=80&w=800" alt="Cyberpunk City" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-60 mix-blend-overlay">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"></div>
+                    <div class="absolute bottom-0 left-0 p-8 w-full">
+                        <div class="flex justify-between items-end">
+                            <div>
+                                <h4 class="font-mono text-xl font-bold text-white mb-1">UberEats Ready</h4>
+                                <p class="text-xs text-neon-green font-mono uppercase tracking-widest">Door-to-Door Series</p>
+                            </div>
+                            <div class="w-8 h-8 rounded-full border border-white/30 flex items-center justify-center group-hover:bg-white group-hover:text-black transition-all">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Running Line / Ticker -->
+    <div class="w-full bg-neon-cyan/5 border-y border-neon-cyan/20 overflow-hidden py-4 mb-24">
+        <div class="whitespace-nowrap animate-[pulse_4s_infinite]">
+            <div class="inline-block animate-[marquee_20s_linear_infinite] font-mono font-bold text-4xl text-transparent bg-clip-text bg-gradient-to-r from-neon-cyan via-white to-neon-cyan opacity-40">
+                FUTURE OF LAZINESS /// NEET STEP /// ZERO MOTIVATION /// NEXT GEN SLEEP /// FUTURE OF LAZINESS /// NEET STEP ///
+            </div>
+        </div>
+    </div>
+
+    <!-- Gallery / Feature Showcase -->
+    <section class="max-w-7xl mx-auto px-4 pb-32">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+            <div class="reveal order-2 md:order-1">
+                <div class="relative">
+                    <div class="absolute -inset-4 bg-gradient-to-r from-neon-purple to-neon-cyan rounded-2xl blur-2xl opacity-30"></div>
+                    <img src="https://images.unsplash.com/photo-1608231387042-66d1773070a5?auto=format&fit=crop&q=80&w=1000" alt="Shoe Detail" class="relative rounded-2xl shadow-2xl border border-white/10 z-10 grayscale hover:grayscale-0 transition-all duration-700">
+                </div>
+            </div>
+            <div class="reveal order-1 md:order-2 space-y-8">
+                <h2 class="font-mono text-4xl md:text-5xl font-bold leading-tight">
+                    BUILT FOR <br>
+                    <span class="text-gradient-neon">APATHY</span>
+                </h2>
+                <div class="space-y-6">
+                    <div class="group flex gap-4 p-4 rounded-xl hover:bg-white/5 transition-colors cursor-pointer border border-transparent hover:border-white/10">
+                        <div class="text-neon-cyan font-mono text-xl">01</div>
+                        <div>
+                            <h4 class="font-bold text-lg mb-1 group-hover:text-neon-cyan transition-colors">Gravity Anchor</h4>
+                            <p class="text-gray-400 text-sm">Makes your feet feel 10x heavier so you don't go to work.</p>
+                        </div>
+                    </div>
+                    <div class="group flex gap-4 p-4 rounded-xl hover:bg-white/5 transition-colors cursor-pointer border border-transparent hover:border-white/10">
+                        <div class="text-neon-purple font-mono text-xl">02</div>
+                        <div>
+                            <h4 class="font-bold text-lg mb-1 group-hover:text-neon-purple transition-colors">Bed Sheet Fusion</h4>
+                            <p class="text-gray-400 text-sm">Seamlessly integrates with your futon for maximum sleep.</p>
+                        </div>
+                    </div>
+                    <div class="group flex gap-4 p-4 rounded-xl hover:bg-white/5 transition-colors cursor-pointer border border-transparent hover:border-white/10">
+                        <div class="text-neon-green font-mono text-xl">03</div>
+                        <div>
+                            <h4 class="font-bold text-lg mb-1 group-hover:text-neon-green transition-colors">Auto-Loose Fit</h4>
+                            <p class="text-gray-400 text-sm">Automatically falls off when you touch a sofa.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="border-t border-white/10 bg-black/80 backdrop-blur-lg">
+        <div class="max-w-7xl mx-auto px-4 py-12 md:py-16">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+                <div class="col-span-1 md:col-span-1">
+                    <div class="font-mono font-bold text-2xl tracking-wider text-white mb-4">NEET STEP</div>
+                    <p class="text-gray-500 text-sm">Redefining the art of staying home.</p>
+                </div>
+                <div>
+                    <h5 class="font-mono text-sm text-white mb-4">SHOP</h5>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><a href="#" class="hover:text-neon-cyan transition-colors">Gaming Chairs</a></li>
+                        <li><a href="#" class="hover:text-neon-cyan transition-colors">Instant Noodles</a></li>
+                        <li><a href="#" class="hover:text-neon-cyan transition-colors">Hoodies</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h5 class="font-mono text-sm text-white mb-4">SUPPORT</h5>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><a href="#" class="hover:text-neon-cyan transition-colors">Why Work?</a></li>
+                        <li><a href="#" class="hover:text-neon-cyan transition-colors">Mom's Phone Number</a></li>
+                        <li><a href="#" class="hover:text-neon-cyan transition-colors">Don't Contact Us</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h5 class="font-mono text-sm text-white mb-4">NEWSLETTER</h5>
+                    <div class="flex">
+                        <input type="email" placeholder="Don't Email Me" class="bg-white/5 border border-white/10 rounded-l px-4 py-2 text-sm w-full focus:outline-none focus:border-neon-cyan text-white">
+                        <button class="bg-neon-cyan text-black px-4 rounded-r font-bold hover:bg-white transition-colors">
+                            Zzz
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="flex flex-col md:flex-row justify-between items-center pt-8 border-t border-white/5 text-xs text-gray-600">
+                <p>&copy; 2024 NEET STEP Inc. No rights reserved. Just sleep.</p>
+                <div class="flex gap-4 mt-4 md:mt-0">
+                    <a href="#" class="hover:text-white transition-colors">Privacy Policy</a>
+                    <a href="#" class="hover:text-white transition-colors">Terms of Service</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script>
+        // --- 1. Three.js Implementation (Neon Cube) ---
+        const initThreeJS = () => {
+            const container = document.getElementById('canvas-container');
+            if (!container) return;
+
+            // Scene setup
+            const scene = new THREE.Scene();
+            // Optional: minimal fog for depth
+            scene.fog = new THREE.FogExp2(0x050505, 0.002);
+
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.z = 5;
+
+            const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            container.appendChild(renderer.domElement);
+
+            // Geometry - A futuristic wireframe cube + an inner glowing core
+            const geometry = new THREE.BoxGeometry(2.5, 2.5, 2.5);
+            
+            // Wireframe Material
+            const wireframeMaterial = new THREE.MeshBasicMaterial({ 
+                color: 0x00f3ff, // Neon Cyan
+                wireframe: true,
+                transparent: true,
+                opacity: 0.3
+            });
+            const wireframeCube = new THREE.Mesh(geometry, wireframeMaterial);
+            
+            // Inner Core Material (Glowing)
+            const coreGeometry = new THREE.BoxGeometry(2.0, 2.0, 2.0);
+            const coreMaterial = new THREE.MeshBasicMaterial({
+                color: 0xbc13fe, // Neon Purple
+                wireframe: true,
+                transparent: true,
+                opacity: 0.1
+            });
+            const coreCube = new THREE.Mesh(coreGeometry, coreMaterial);
+
+            // Group them
+            const cubeGroup = new THREE.Group();
+            cubeGroup.add(wireframeCube);
+            cubeGroup.add(coreCube);
+            scene.add(cubeGroup);
+
+            // Particles (Stars/Dust)
+            const particlesGeometry = new THREE.BufferGeometry();
+            const particlesCount = 700;
+            const posArray = new Float32Array(particlesCount * 3);
+            for(let i = 0; i < particlesCount * 3; i++) {
+                posArray[i] = (Math.random() - 0.5) * 15;
+            }
+            particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+            const particlesMaterial = new THREE.PointsMaterial({
+                size: 0.02,
+                color: 0xffffff,
+                transparent: true,
+                opacity: 0.5
+            });
+            const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
+            scene.add(particlesMesh);
+
+            // Mouse Interaction Logic
+            let mouseX = 0;
+            let mouseY = 0;
+            let targetRotationX = 0;
+            let targetRotationY = 0;
+
+            const windowHalfX = window.innerWidth / 2;
+            const windowHalfY = window.innerHeight / 2;
+
+            document.addEventListener('mousemove', (event) => {
+                mouseX = (event.clientX - windowHalfX);
+                mouseY = (event.clientY - windowHalfY);
+            });
+
+            // Animation Loop
+            const animate = () => {
+                requestAnimationFrame(animate);
+
+                // Smooth rotation based on mouse
+                targetRotationY = mouseX * 0.001;
+                targetRotationX = mouseY * 0.001;
+
+                cubeGroup.rotation.y += 0.05 * (targetRotationY - cubeGroup.rotation.y);
+                cubeGroup.rotation.x += 0.05 * (targetRotationX - cubeGroup.rotation.x);
+                
+                // Auto rotation fallback
+                cubeGroup.rotation.y += 0.002;
+                cubeGroup.rotation.z += 0.001;
+
+                // Wireframe pulsing effect
+                const time = Date.now() * 0.001;
+                wireframeCube.scale.setScalar(1 + Math.sin(time) * 0.05);
+
+                // Particles movement
+                particlesMesh.rotation.y = -time * 0.05;
+
+                renderer.render(scene, camera);
+            };
+
+            animate();
+
+            // Resize handling
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+        };
+
+        // --- 2. Scroll Animations (Fade-in Up) ---
+        const initScrollAnimations = () => {
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.1
+            };
+
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('active');
+                        observer.unobserve(entry.target); // Run once
+                    }
+                });
+            }, observerOptions);
+
+            document.querySelectorAll('.reveal').forEach(el => {
+                observer.observe(el);
+            });
+        };
+
+        // Initialize everything on load
+        window.addEventListener('DOMContentLoaded', () => {
+            initThreeJS();
+            initScrollAnimations();
+        });
+
+    </script>
+</body>
+</html>
